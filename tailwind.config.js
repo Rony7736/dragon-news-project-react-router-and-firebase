@@ -7,7 +7,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'Poppins' : ["Poppins", "sans-serif"],
+
+      },
+    },
   },
   plugins: [
     daisyui,
