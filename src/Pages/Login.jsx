@@ -1,10 +1,17 @@
-import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../Provider/AuthProvider";
 
 const Login = () => {
 
     const {loginUser, setUser} = useContext(AuthContext)
+
+    // error validation
+    const [error, setError] = useState({})
+
+    // login korar pore onno page a niye jaoar jonno --> 2nd step
+    const location = useLocation()
+    const navigate = useNavigate()
 
     const handleSubmit = (e)=> {
         e.preventDefault()
@@ -12,15 +19,16 @@ const Login = () => {
         const form = e.target;
         const email = form.email.value
         const password = form.password.value
-        console.log({email, password});
+        // console.log({email, password});
         
         loginUser(email, password)
         .then(result => {
             const user = result.user
             setUser(user)
+            navigate(location?.state ? location.state : "/") 
         })
-        .catch((error) => {
-            alert(error.code)
+        .catch((err) => {
+            setError({...error, login: err.code})
           });
     }
 
@@ -40,9 +48,17 @@ const Login = () => {
                             <span className="label-text">Password</span>
                         </label>
                         <input type="password" placeholder="password" name="password" className="input input-bordered" required />
-                        <label className="label">
-                            <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
-                        </label>
+
+                        {
+                            error.login && (
+                            <label className="label text-sm text-red-600">
+                                {error.login}
+                                {/* <a href="#" className="label-text-alt link link-hover">Forgot password?</a> */}
+                            </label>
+                            )
+                        }
+
+                        
                     </div>
                     <div className="form-control mt-6">
                         <button className="btn btn-neutral rounded-none">Login</button>

@@ -1,10 +1,15 @@
-import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../Provider/AuthProvider";
 
 const Register = () => {
 
-    const {createNewUser, setUser} = useContext(AuthContext)
+    const { createNewUser, setUser, updateUserProfile } = useContext(AuthContext)
+
+    const navigate = useNavigate()
+
+    // error validation
+    const [error, setError] = useState({})
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -18,30 +23,42 @@ const Register = () => {
         // console.log(name, photo, email, password);
 
         // same jinis build in method a kora jay -->
-    
 
-        const  form = new FormData(e.target)
+
+        const form = new FormData(e.target)
 
         const name = form.get('name')
+        if (name.length < 4) {
+            setError({ ...error, name: "must be 4 charecter long" })
+            return
+        }
         const photo = form.get('photo')
         const email = form.get('email')
         const password = form.get('password')
-        // console.log({name, photo, email, password});
+        console.log({name, photo});
 
 
         createNewUser(email, password)
-        .then(result => {
-            const user = result.user
-            setUser(user)
-            console.log(user)            
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage);
-            
-          });
-        
+            .then(result => {
+                const user = result.user
+                setUser(user)
+                // console.log(user)     
+                
+                // update profile er jonno
+                updateUserProfile({ displayName: name, photoURL: photo })
+                    .then(() => {
+                        navigate("/")
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorCode, errorMessage);
+            });
+
     }
 
 
@@ -56,6 +73,14 @@ const Register = () => {
                         </label>
                         <input type="text" placeholder="name" name="name" className="input input-bordered" required />
                     </div>
+
+                    {
+                        error.name && (
+                            <label className="label text-sm text-red-500">
+                                {error.name}
+                            </label>)
+                    }
+
                     <div className="form-control">
                         <label className="label">
                             <span className="label-text">Photo URL</span>
